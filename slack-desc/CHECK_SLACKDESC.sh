@@ -17,7 +17,7 @@ done
 FILES=$(/bin/ls $CWD)
 for f in $FILES; do
 	if [ "$(grep -Poc $f ../modules.txt)" -lt 1 ]; then
-		if [[ $f != "CHECK_SLACKDESC.sh" && $f != "make_slack-desc.sh" ]]; then
+		if [[ $f != "CHECK_SLACKDESC.sh" && $f != "make_slack-desc.sh" && != "libfm-extra" ]]; then
 			rm $f
 		fi
 	fi	

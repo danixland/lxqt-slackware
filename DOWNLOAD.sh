@@ -25,10 +25,13 @@ $GIT submodule init || echo "error initializing submodules" >> $ERROR_LOG
 # checkout every submodule
 $GIT submodule update --remote --rebase || echo "error during checkout of submodules" >> $ERROR_LOG
 
+# return to main directory 
+cd $CWD
+
 # we grab the module's version numbers before deleting everything git related
 sh ${CWD}/GRAB_VERSION.sh $SRCDIR
 
 # we are done with git, so let's cleanup from all the unwanted git folders and files
-find . -name '.git*' -mindepth 1 -exec rm -rfv '{}' \; || echo "error during removal of git files from source" >> $ERROR_LOG
+find $SRCDIR -name '.git*' -mindepth 1 -exec rm -rfv '{}' \; || echo "error during removal of git files from source" >> $ERROR_LOG
 
 # ALL DONE
