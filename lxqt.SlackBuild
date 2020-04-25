@@ -1,0 +1,167 @@
+#!/bin/sh
+# Copyright 2020  Danilo 'danix' Macrì < danix@danix.xyz >
+# All rights reserved.
+#
+# Redistribution and use of this script, with or without modification, is
+# permitted provided that the following conditions are met:
+#
+# 1. Redistributions of this script must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
+#  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+#  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO
+#  EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+#  OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+#  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+#  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+#  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# Adapted from the lxqt modular build from Eric Hameleers <alien@slackware.com>
+
+### Run this script as lxqt.SlackBuild <program> to build the pkg "program"
+
+set -e
+
+# Set initial variables:
+CWD=$(pwd)
+TMP=${TMP:-/tmp}
+BUILD_DIR=${BUILD_DIR:-$TMP/lxqt-build}
+
+# some useful functions
+fix_perms() {
+  target_dir=$1
+  [ -z "$target_dir" ] && target_dir='.'
+
+  chown -R root:root $target_dir
+  find $target_dir \
+   \( -perm 777 -o -perm 775 -o -perm 711 -o -perm 555 -o -perm 511 \) \
+   -exec chmod 755 {} \; -o \
+   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
+   -exec chmod 644 {} \;
+}
+
+strip_binaries() {
+  target_dir=$1
+  [ -z "$target_dir" ] && target_dir='.'
+
+  find $target_dir | xargs file | grep "executable" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+  find $target_dir | xargs file | grep "shared object" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+  find $target_dir | xargs file | grep "current ar archive" | grep ELF | cut -f 1 -d : | xargs strip -g 2> /dev/null
+}
+
+process_man_pages() {
+  # Compress and if needed symlink the man pages:
+  if [ -d usr/man ]; then
+    ( cd usr/man
+      for manpagedir in $(find . -type d -name "man*") ; do
+      ( cd $manpagedir
+        for eachpage in $( find . -type l -maxdepth 1) ; do
+          ln -s $( readlink $eachpage ).gz $eachpage.gz
+          rm $eachpage
+        done
+        gzip -9 *.* || { touch ${BUILD_DIR}/${PROGRAM}.failed ; continue ; }
+      )
+      done
+    )
+  fi
+}
+
+process_info_pages() {
+  # Compress info pages and purge "dir" file from the package:
+  if [ -d usr/info ]; then
+    ( cd usr/info
+      rm -f dir
+      gzip -9 *
+    )
+  fi
+}
+
+no_usr_share_doc() {
+  # If there are docs, move them:
+  if [ -d usr/share/doc ]; then
+    mkdir -p usr/doc
+    mv usr/share/doc/* usr/doc
+    rmdir usr/share/doc
+  fi
+}
+
+PROGRAM=$1
+VERSION=${VERSION:-0.15.0}
+PKG="$BUILD_DIR/package-${PROGRAM}"
+
+# Import the build configuration options for as far as they are not already set:
+[ -r ./lxqt.options ] && . ./lxqt.options
+
+# This avoids compiling a version number into LXQT's .la files:
+QTDIR=/usr/lib${LIBDIRSUFFIX}/qt ; export QTDIR
+
+# Reset $PKGARCH to its initial value:
+PKGARCH=$ARCH
+# Perhaps $PKGARCH should be something different:
+if grep -wq "^${PROGRAM}$" ${CWD}/noarch ; then
+  PKGARCH=noarch
+fi 
+
+rm -rf "$PKG" "$TMP/${PROGRAM}-$VERSION"
+
+cd "$TMP"
+cp -R ${CWD}/src/${PROGRAM} $TMP/${PROGRAM}-$VERSION
+cd "${PROGRAM}"-$VERSION
+
+fix_perms
+
+# If any patches are needed, call this script to apply them:
+if [ -r $CWD/patch/${PROGRAM}.patch ]; then
+  . $CWD/patch/${PROGRAM}.patch || exit 1
+fi
+
+# Check autotools builds before continuing with cmake programs
+if [ -r $CWD/autotools/${PROGRAM} ]; then
+  . $CWD/autotools/${PROGRAM}
+else
+  if [ -r $CWD/cmake/${PROGRAM} ]; then
+    . $CWD/cmake/${PROGRAM}
+  else
+    # This is the default configure script:
+    . $CWD/cmake/cmake
+  fi
+fi
+
+make $NUMJOBS || make || exit 1
+make install DESTDIR=$PKG || exit 1
+
+# Get rid of zero-length junk files:
+find $PKG/usr/doc/${PROGRAM}-$VERSION -type f -size 0 -exec rm --verbose "{}" \; || { touch ${BUILD_DIR}/${PROGRAM}.failed ; continue ; }
+rmdir --verbose $PKG/usr/doc/${PROGRAM}-$VERSION 2> /dev/null || { touch ${BUILD_DIR}/${PROGRAM}.failed ; continue ; }
+
+# Strip binaries:
+strip_binaries || { touch ${BUILD_DIR}/${PROGRAM}.failed ; continue ; }
+
+# If there's any special post-install things to do, do them:
+if [ -r $CWD/post-install/${PROGRAM}.post-install ]; then
+. $CWD/post-install/${PROGRAM}.post-install
+fi
+
+# If this package requires some doinst.sh material, add it here:
+if [ -r $CWD/doinst.sh/${PROGRAM} ]; then
+mkdir -p $PKG/install
+cat $CWD/doinst.sh/${PROGRAM} \
+  | sed -e "s#usr/lib#usr/lib${LIBDIRSUFFIX}#g" \
+  >> $PKG/install/doinst.sh
+fi
+
+cd $PKG
+process_man_pages
+process_info_pages
+no_usr_share_doc          
+mkdir -p $PKG/install
+if [ -r $CWD/slack-desc/${PROGRAM} ]; then
+  cat $CWD/slack-desc/${PROGRAM} > $PKG/install/slack-desc
+else
+  touch $PKG/install/slack-desc-missing
+fi
+
+/sbin/makepkg -l y -c n "$BUILD_DIR/${PROGRAM}-$VERSION-$PKGARCH-$BUILD$TAG.txz"

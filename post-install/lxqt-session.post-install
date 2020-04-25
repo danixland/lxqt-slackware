@@ -1,0 +1,6 @@
+# Use ck-launch-session in runlevel 3,
+# to start and attach a ConsoleKit session to the X session:
+mkdir -p $PKG/etc/X11/xinit
+cat $CWD/post-install/lxqt-session/xinit/xinitrc.lxqt > $PKG/etc/X11/xinit/xinitrc.lxqt
+chmod 0755 $PKG/etc/X11/xinit/xinitrc.lxqt
+

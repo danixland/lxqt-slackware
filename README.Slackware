@@ -1,0 +1,126 @@
+LXQT On Slackware
+=================
+
+If you want to install and use LXQT on Slackware, you need more than just
+the packages in the lxqt package directory for Slackware 14.2 or -current.
+All of the below are also required if you want to compile LXQT yourself.
+
+Openbox
+-------
+
+LXQT needs a Window Manager, it does not have one itself.  LXQT will offer
+you a choice of fvwm2, xfwm4, fluxbox on its first start but you can also
+install openbox. If you do prefer openbox, get these two packages from my
+'slackbuilds' repository,
+http://bear.alienbase.nl/mirrors/people/alien/slackbuilds/ :
+
+obconf
+openbox
+
+Dependencies
+------------
+
+Openbox is a dependency for compiling obconf-qt but if you are not interested
+in using openbox you can skip installing openbox and compiling obconf-qt.
+
+The real mandatory dependencies are related to Qt5 and the KDE Frameworks,
+upon which LXQT was built.
+Therefore the following packages should be obtained from my 'ktown'repository,
+http://bear.alienbase.nl/mirrors/alien-kde/ below the directory specific to
+your Slackware release and architecture.
+More specifically from its subdirectories 'deps', 'kde/frameworks',
+'kde/plasma' and 'kde/plasma-extra':
+
+# deps:
+libdbusmenu-qt5
+libinput
+libxkbcommon
+polkit-qt5-1
+qt5
+qt5-webkit
+wayland
+
+# kde/frameworks:
+attica-framework
+baloo5
+bluez-qt
+breeze-icons
+extra-cmake-modules
+frameworkintegration
+kactivities-framework
+kactivities-stats
+kapidox
+karchive
+kauth
+kbookmarks
+kcmutils
+kcodecs
+kcompletion
+kconfig
+kconfigwidgets
+kcoreaddons
+kcrash
+kdbusaddons
+kdeclarative
+kded
+kdelibs4support
+kdesignerplugin
+kdesu
+kdewebkit
+kdnssd
+kdoctools
+kemoticons
+kfilemetadata5
+kglobalaccel
+kguiaddons
+khtml
+ki18n
+kiconthemes
+kidletime
+kimageformats
+kinit
+kio
+kitemmodels
+kitemviews
+kjobwidgets
+kjs
+kjsembed
+kmediaplayer
+knewstuff
+knotifications
+knotifyconfig
+kpackage
+kparts
+kpeople
+kplotting
+kpty
+kross
+krunner
+kservice
+ktexteditor
+ktextwidgets
+kunitconversion
+kwallet
+kwidgetsaddons
+kwindowsystem
+kxmlgui
+kxmlrpcclient
+modemmanager-qt
+networkmanager-qt
+oxygen-icons5
+plasma-framework
+solid
+sonnet
+threadweaver
+
+# plasma:
+libkscreen2
+
+# plasma-extra:
+sddm-qt5
+
+Finally, you need the following packages from my main slackbuilds repository
+at http://bear.alienbase.nl/mirrors/people/alien/slackbuilds/ :
+
+libstatgrab
+muparser

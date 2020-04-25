@@ -1,0 +1,5 @@
+echo "REMOVING MAN PAGES LINKS"
+rm -rf $PKG/usr/man/man1/lxsu.1.gz
+rm -rf $PKG/usr/man/man1/lxsudo.1.gz
+echo "REMOVED MAN PAGES LINKS"
+

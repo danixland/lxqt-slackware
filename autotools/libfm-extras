@@ -1,0 +1,17 @@
+./autogen.sh \
+  --enable-debug \
+  --without-gtk \
+  --disable-demo
+
+CFLAGS="$SLKCFLAGS" \
+CXXFLAGS="$SLKCFLAGS" \
+./configure \
+  --prefix=/usr \
+  --libdir=/usr/lib${LIBDIRSUFFIX} \
+  --sysconfdir=/etc \
+  --localstatedir=/var \
+  --mandir=/usr/man \
+  --enable-static=no \
+  --with-extra-only \
+  --with-gtk=no \
+  --build=$ARCH
