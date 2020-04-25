@@ -1,0 +1,4 @@
+*~
+*.un~
+packages/*
+src/*
