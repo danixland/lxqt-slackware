@@ -24,16 +24,19 @@ The latest set of packages for KDE5 from AlienBob are here --> [ktown](https://a
 Before we get to start building we need to do a few things:
 
 * Check prerequisite packages to ensure that we have all dependancies:
+    * after running this script we'll have a log of all the installed dependancies as well as hints on where to find those packages we are missing.
+    * a little notice regarding gtk+2 and gtk+3, even if those 2 packages are installed, my script doesn't see them, I think it has something to do with the way regex works and the fact that there's a + in the name, but I didn't investigate much. Bottom line, if you have them installed you're good to go!
+
 ```
 sh CHECK_PREREQ.sh
 ```
-    * after running this script we'll have a log of all the installed dependancies as well as hints on where to find those packages we are missing.
-    * a little notice regarding gtk+2 and gtk+3, even if those 2 packages are installed, my script doesn't see them, I think it has something to do with the way regex works and the fact that there's a + in the name, but I didn't investigate much. Bottom line, if you have them installed you're good to go!
+
 * Download the source tree, this operation will also give us the version numbers for every package
+    * this script will generate a versioning file containing all the version numbers for the packages.
+
 ```
 sh DOWNLOAD.sh
 ```
-    * this script will generate a versioning file containing all the version numbers for the packages.
 
 ### Building and Installing
 
