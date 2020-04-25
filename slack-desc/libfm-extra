@@ -1,0 +1,19 @@
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in.  You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+           |-----handy-ruler------------------------------------------------------|
+libfm-extra: libfm-extra
+libfm-extra: Extra files for libfm
+libfm-extra:
+libfm-extra:
+libfm-extra:
+libfm-extra:
+libfm-extra: This package is part of LXQT 0.15.0
+libfm-extra: Mantainer: danix < danix@danix.xyz >
+libfm-extra:
+libfm-extra: Home page: https://github.com/lxqt/lxqt
+libfm-extra:

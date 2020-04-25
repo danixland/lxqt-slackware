@@ -89,6 +89,10 @@ no_usr_share_doc() {
 }
 
 PROGRAM=$1
+SOURCE=$PROGRAM
+if [[ $PROGRAM == 'libfm-extra' ]]; then
+  SOURCE='libfm'
+fi
 VERSION=${VERSION:-0.15.0}
 PKG="$BUILD_DIR/package-${PROGRAM}"
 
@@ -108,7 +112,7 @@ fi
 rm -rf "$PKG" "$TMP/${PROGRAM}-$VERSION"
 
 cd "$TMP"
-cp -R ${CWD}/src/${PROGRAM} $TMP/${PROGRAM}-$VERSION
+cp -R ${CWD}/src/${SOURCE} $TMP/${PROGRAM}-$VERSION
 cd "${PROGRAM}"-$VERSION
 
 fix_perms
@@ -120,12 +124,15 @@ fi
 
 # Check autotools builds before continuing with cmake programs
 if [ -r $CWD/autotools/${PROGRAM} ]; then
+  echo "sourcing autotools settings for $PROGRAM"
   . $CWD/autotools/${PROGRAM}
 else
   if [ -r $CWD/cmake/${PROGRAM} ]; then
+    echo "sourcing cmake settings for $PROGRAM"
     . $CWD/cmake/${PROGRAM}
   else
     # This is the default configure script:
+    echo "setting generic cmake for $PROGRAM"
     . $CWD/cmake/cmake
   fi
 fi
